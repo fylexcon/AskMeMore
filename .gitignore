@@ -1,0 +1,12 @@
+node_modules
+.expo
+.turbo
+dist
+coverage
+*.log
+.env
+.env.local
+.env.*.local
+apps/api/prisma/migrations
+apps/mobile/.expo
+.test-build

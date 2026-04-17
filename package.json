@@ -1,0 +1,20 @@
+{
+  "name": "ask-me-more",
+  "private": true,
+  "packageManager": "npm@11.9.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "dev:api": "npm run dev -w @ask-me-more/api",
+    "dev:mobile": "npm run dev -w @ask-me-more/mobile"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}
