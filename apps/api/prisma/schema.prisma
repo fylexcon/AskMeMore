@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String            @id @default(uuid())
+  email       String            @unique
+  createdAt   DateTime          @default(now())
+  deletedAt   DateTime?
+  devices     Device[]
+  refreshes   RefreshToken[]
+  memberships RelationshipMember[]
+  aiRequests  AIRequest[]
+  progress    ProgressRollup[]
+  reports     ReportedQuestion[]
+}
+
+model Device {
+  id         String   @id @default(uuid())
+  userId     String
+  name       String
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EmailOtp {
+  id         String   @id @default(uuid())
+  email      String
+  code       String
+  deviceName String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+}
+
+model RefreshToken {
+  id               String   @id @default(uuid())
+  userId           String
+  tokenHash        String   @unique
+  deviceName       String
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime @default(now())
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Relationship {
+  id           String               @id @default(uuid())
+  displayName  String
+  inviteCode   String               @unique
+  createdAt    DateTime             @default(now())
+  members      RelationshipMember[]
+  entitlements Entitlement[]
+  invites      RelationshipInvite[]
+  aiRequests   AIRequest[]
+}
+
+model RelationshipMember {
+  id             String       @id @default(uuid())
+  relationshipId String
+  userId         String       @unique
+  createdAt      DateTime     @default(now())
+  relationship   Relationship @relation(fields: [relationshipId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RelationshipInvite {
+  id             String       @id @default(uuid())
+  relationshipId String
+  inviteCode     String       @unique
+  createdAt      DateTime     @default(now())
+  acceptedAt     DateTime?
+  relationship   Relationship @relation(fields: [relationshipId], references: [id], onDelete: Cascade)
+}
+
+model Entitlement {
+  id             String       @id @default(uuid())
+  relationshipId String
+  source         String
+  grantedAt      DateTime     @default(now())
+  expiresAt      DateTime?
+  relationship   Relationship @relation(fields: [relationshipId], references: [id], onDelete: Cascade)
+}
+
+model UnlockCode {
+  id                     String   @id @default(uuid())
+  code                   String   @unique
+  durationDays           Int
+  note                   String?
+  createdAt              DateTime @default(now())
+  redeemedAt             DateTime?
+  redeemedByUserId       String?
+  redeemedRelationshipId String?
+}
+
+model UnlockRedemption {
+  id             String   @id @default(uuid())
+  unlockCodeId   String
+  redeemedByUserId String
+  relationshipId String
+  createdAt      DateTime @default(now())
+}
+
+model ProgressRollup {
+  id            String   @id @default(uuid())
+  userId        String
+  key           String
+  categoryId    String
+  source        String
+  answeredCount Int
+  completedDeck Boolean
+  happenedOn    DateTime
+  syncedAt      DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+}
+
+model AIRequest {
+  id             String       @id @default(uuid())
+  userId         String
+  relationshipId String?
+  categoryId     String
+  depth          String
+  model          String
+  outputHash     String
+  status         String
+  latencyMs      Int
+  createdAt      DateTime     @default(now())
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  relationship   Relationship? @relation(fields: [relationshipId], references: [id], onDelete: SetNull)
+}
+
+model AnalyticsEvent {
+  id         String   @id @default(uuid())
+  userId     String?
+  eventName  String
+  platform   String
+  payload    Json
+  createdAt  DateTime @default(now())
+}
+
+model ContentManifest {
+  id                        String   @id @default(uuid())
+  version                   String
+  minimumSupportedAppVersion String
+  createdAt                 DateTime @default(now())
+}
+
+model FeatureFlag {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  enabled     Boolean
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+model ReportedQuestion {
+  id         String   @id @default(uuid())
+  userId     String
+  categoryId String
+  source     String
+  question   String
+  reason     String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
