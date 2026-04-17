@@ -1,0 +1,30 @@
+name: Deploy Staging
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "ask-me-more/**"
+  workflow_dispatch:
+
+jobs:
+  deploy-api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ask-me-more
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ask-me-more/package-lock.json
+      - run: npm install
+      - run: npm run test
+      - run: npm run build
+      - name: Deploy API to Railway
+        run: echo "Configure Railway deployment and secrets here."
+      - name: Publish Expo preview build
+        run: echo "Configure EAS preview builds here."
