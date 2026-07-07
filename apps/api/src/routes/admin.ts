@@ -23,7 +23,7 @@ export const adminRoutes: FastifyPluginAsync = async (app) => {
 
       const codes = Array.from({ length: body.quantity }, () => randomUpperToken("AMM"));
       for (const code of codes) {
-        app.runtime.store.saveUnlockCode({
+        await app.runtime.store.saveUnlockCode({
           code,
           durationDays: body.durationDays,
           note: body.note,
@@ -49,7 +49,7 @@ export const adminRoutes: FastifyPluginAsync = async (app) => {
         return;
       }
 
-      app.runtime.store.setContentManifest({
+      await app.runtime.store.setContentManifest({
         version: body.version,
         minimumSupportedAppVersion: body.minimumSupportedAppVersion,
       });
@@ -69,7 +69,7 @@ export const adminRoutes: FastifyPluginAsync = async (app) => {
         return;
       }
 
-      app.runtime.store.setFeatureFlag(body);
+      await app.runtime.store.setFeatureFlag(body);
       return body;
     },
   );

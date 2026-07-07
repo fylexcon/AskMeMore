@@ -32,7 +32,7 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
 
     const code = app.runtime.generateOtpCode();
     const expiresAt = new Date(Date.now() + app.runtime.env.OTP_TTL_SECONDS * 1000).toISOString();
-    app.runtime.store.createOtp(body.email, code, body.deviceName, expiresAt);
+    await app.runtime.store.createOtp(body.email, code, body.deviceName, expiresAt);
     await app.runtime.emailProvider.sendOtp(body.email, code);
 
     return {
@@ -47,15 +47,15 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
       return;
     }
 
-    const valid = app.runtime.store.validateOtp(body.email, body.code);
+    const valid = await app.runtime.store.validateOtp(body.email, body.code);
     if (!valid) {
       reply.code(400).send({ message: "Invalid or expired code." });
       return;
     }
 
-    const user = app.runtime.store.upsertUser(body.email);
-    const session = app.runtime.issueSession(user.id, body.deviceName);
-    const relationship = app.runtime.store.getRelationshipIdForUser(user.id);
+    const user = await app.runtime.store.upsertUser(body.email);
+    const session = await app.runtime.issueSession(user.id, body.deviceName);
+    const relationship = await app.runtime.store.getRelationshipIdForUser(user.id);
 
     return AuthSessionSchema.parse({
       user: {
@@ -76,7 +76,7 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
       return;
     }
 
-    const session = app.runtime.refreshSession(body.refreshToken);
+    const session = await app.runtime.refreshSession(body.refreshToken);
     if (!session) {
       reply.code(401).send({ message: "Refresh token is invalid." });
       return;
@@ -95,7 +95,7 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
       return;
     }
 
-    app.runtime.revokeRefreshToken(body.refreshToken);
+    await app.runtime.revokeRefreshToken(body.refreshToken);
     reply.code(204).send();
   });
 
@@ -109,13 +109,13 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
         return;
       }
 
-      const user = app.runtime.store.findUserById(request.viewer.userId);
+      const user = await app.runtime.store.findUserById(request.viewer.userId);
       if (!user) {
         reply.code(404).send({ message: "User not found." });
         return;
       }
 
-      const relationshipId = app.runtime.store.getRelationshipIdForUser(user.id);
+      const relationshipId = await app.runtime.store.getRelationshipIdForUser(user.id);
       return UserProfileSchema.parse({
         id: user.id,
         email: user.email,
@@ -135,7 +135,7 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
         return;
       }
 
-      app.runtime.store.markUserDeleted(request.viewer.userId);
+      await app.runtime.store.markUserDeleted(request.viewer.userId);
       reply.code(204).send();
     },
   );

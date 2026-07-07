@@ -9,6 +9,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -16,10 +18,23 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: package-lock.json
-      - run: npm install
-      - run: npm run test
-      - run: npm run build
-      - name: Deploy production API
-        run: echo "Configure Railway production deployment here."
-      - name: Build mobile release
-        run: echo "Configure EAS TestFlight and Play Internal release builds here."
+      
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          
+      - run: npm install --legacy-peer-deps
+      
+      - name: Build Android APK (Local Runner)
+        working-directory: ./apps/mobile
+        run: eas build --platform android --profile preview --non-interactive --local --output ../../AskMeMore.apk
+        
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: AskMeMore.apk
+          generate_release_notes: true

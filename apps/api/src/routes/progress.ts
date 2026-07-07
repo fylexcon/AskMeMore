@@ -20,7 +20,7 @@ export const progressRoutes: FastifyPluginAsync = async (app) => {
         return;
       }
 
-      const syncedAt = app.runtime.store.upsertProgress(request.viewer.userId, body.rollups);
+      const syncedAt = await app.runtime.store.upsertProgress(request.viewer.userId, body.rollups);
       return SyncProgressResultSchema.parse({
         acceptedKeys: body.rollups.map((rollup: (typeof body.rollups)[number]) => rollup.key),
         syncedAt,
@@ -38,7 +38,7 @@ export const progressRoutes: FastifyPluginAsync = async (app) => {
         return null;
       }
 
-      return ProgressSummarySchema.parse(app.runtime.store.getProgressSummary(request.viewer.userId));
+      return ProgressSummarySchema.parse(await app.runtime.store.getProgressSummary(request.viewer.userId));
     },
   );
 };

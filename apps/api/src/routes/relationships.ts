@@ -24,13 +24,13 @@ export const relationshipRoutes: FastifyPluginAsync = async (app) => {
         return;
       }
 
-      const relationship = app.runtime.store.createRelationship(request.viewer.userId, body.displayName);
+      const relationship = await app.runtime.store.createRelationship(request.viewer.userId, body.displayName);
       if (!relationship) {
         reply.code(400).send({ message: "Could not create relationship." });
         return;
       }
 
-      const summary = app.runtime.store.getRelationshipForUser(request.viewer.userId);
+      const summary = await app.runtime.store.getRelationshipForUser(request.viewer.userId);
       return RelationshipSummarySchema.parse(summary);
     },
   );
@@ -50,7 +50,7 @@ export const relationshipRoutes: FastifyPluginAsync = async (app) => {
         return;
       }
 
-      const result = app.runtime.store.joinRelationship(request.viewer.userId, body.inviteCode);
+      const result = await app.runtime.store.joinRelationship(request.viewer.userId, body.inviteCode);
       if ("error" in result) {
         if (result.error === "not_found") {
           reply.code(404).send({ message: "Invite code not found." });
@@ -66,7 +66,7 @@ export const relationshipRoutes: FastifyPluginAsync = async (app) => {
         return;
       }
 
-      const summary = app.runtime.store.getRelationshipForUser(request.viewer.userId);
+      const summary = await app.runtime.store.getRelationshipForUser(request.viewer.userId);
       return RelationshipSummarySchema.parse(summary);
     },
   );
@@ -81,7 +81,7 @@ export const relationshipRoutes: FastifyPluginAsync = async (app) => {
         return null;
       }
 
-      const relationship = app.runtime.store.getRelationshipForUser(request.viewer.userId);
+      const relationship = await app.runtime.store.getRelationshipForUser(request.viewer.userId);
       return relationship ? RelationshipSummarySchema.parse(relationship) : null;
     },
   );

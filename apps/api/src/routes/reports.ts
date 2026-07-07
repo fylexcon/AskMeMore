@@ -20,7 +20,7 @@ export const reportRoutes: FastifyPluginAsync = async (app) => {
         return;
       }
 
-      app.runtime.store.appendReportedQuestion({
+      await app.runtime.store.appendReportedQuestion({
         ...body,
         userId: request.viewer.userId,
         createdAt: new Date().toISOString(),

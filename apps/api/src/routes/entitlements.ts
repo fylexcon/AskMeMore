@@ -20,9 +20,9 @@ export const entitlementRoutes: FastifyPluginAsync = async (app) => {
         return;
       }
 
-      let relationshipId = app.runtime.store.getRelationshipIdForUser(request.viewer.userId);
+      let relationshipId = await app.runtime.store.getRelationshipIdForUser(request.viewer.userId);
       if (!relationshipId) {
-        const relationship = app.runtime.store.createRelationship(request.viewer.userId, "Our Connection");
+        const relationship = await app.runtime.store.createRelationship(request.viewer.userId, "Our Connection");
         relationshipId = relationship?.id ?? null;
       }
 
@@ -31,7 +31,7 @@ export const entitlementRoutes: FastifyPluginAsync = async (app) => {
         return;
       }
 
-      const result = app.runtime.store.redeemUnlockCode(body.code, request.viewer.userId, relationshipId);
+      const result = await app.runtime.store.redeemUnlockCode(body.code, request.viewer.userId, relationshipId);
       if ("error" in result) {
         const code = result.error === "not_found" ? 404 : 409;
         reply.code(code).send({
@@ -40,7 +40,7 @@ export const entitlementRoutes: FastifyPluginAsync = async (app) => {
         return;
       }
 
-      return EntitlementStatusSchema.parse(app.runtime.store.getEntitlement(relationshipId));
+      return EntitlementStatusSchema.parse(await app.runtime.store.getEntitlement(relationshipId));
     },
   );
 
@@ -54,8 +54,8 @@ export const entitlementRoutes: FastifyPluginAsync = async (app) => {
         return null;
       }
 
-      const relationshipId = app.runtime.store.getRelationshipIdForUser(request.viewer.userId);
-      return EntitlementStatusSchema.parse(app.runtime.store.getEntitlement(relationshipId));
+      const relationshipId = await app.runtime.store.getRelationshipIdForUser(request.viewer.userId);
+      return EntitlementStatusSchema.parse(await app.runtime.store.getEntitlement(relationshipId));
     },
   );
 };

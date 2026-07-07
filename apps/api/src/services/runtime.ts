@@ -21,16 +21,46 @@ export type AIProvider = {
   }): Promise<string>;
 };
 
+export interface IStore {
+  createOtp(email: string, code: string, deviceName: string, expiresAt: string): Promise<void>;
+  validateOtp(email: string, code: string): Promise<boolean>;
+  getOtp(email: string): Promise<SessionRecord | any>; // Will just use types from there
+  findUserByEmail(email: string): Promise<any>;
+  findUserById(userId: string): Promise<any>;
+  upsertUser(email: string): Promise<any>;
+  markUserDeleted(userId: string): Promise<void>;
+  saveSession(session: SessionRecord): Promise<void>;
+  getSessionByAccessToken(token: string): Promise<SessionRecord | null>;
+  getSessionByRefreshToken(token: string): Promise<SessionRecord | null>;
+  revokeSession(refreshToken: string): Promise<void>;
+  createRelationship(userId: string, displayName: string): Promise<any>;
+  joinRelationship(userId: string, inviteCode: string): Promise<any>;
+  getRelationshipForUser(userId: string): Promise<any>;
+  getRelationshipIdForUser(userId: string): Promise<string | null>;
+  saveUnlockCode(code: any): Promise<void>;
+  redeemUnlockCode(code: string, userId: string, relationshipId: string): Promise<any>;
+  setAdminEntitlement(relationshipId: string): Promise<any>;
+  getEntitlement(relationshipId: string | null): Promise<any>;
+  upsertProgress(userId: string, rollups: any[]): Promise<string>;
+  getProgressSummary(userId: string): Promise<any>;
+  appendAIRequest(record: any): Promise<void>;
+  appendAnalytics(record: any): Promise<void>;
+  appendReportedQuestion(record: any): Promise<void>;
+  setContentManifest(update: any): Promise<void>;
+  setFeatureFlag(flag: any): Promise<void>;
+  contentManifest?: any;
+}
+
 export type AppRuntime = {
   env: AppEnv;
-  store: MemoryStore;
+  store: IStore;
   emailProvider: EmailProvider;
   aiProvider: AIProvider;
   generateOtpCode(): string;
-  issueSession(userId: string, deviceName: string): SessionRecord;
-  refreshSession(refreshToken: string): SessionRecord | null;
-  validateAccessToken(accessToken: string): SessionRecord | null;
-  revokeRefreshToken(refreshToken: string): void;
+  issueSession(userId: string, deviceName: string): Promise<SessionRecord>;
+  refreshSession(refreshToken: string): Promise<SessionRecord | null>;
+  validateAccessToken(accessToken: string): Promise<SessionRecord | null>;
+  revokeRefreshToken(refreshToken: string): Promise<void>;
   buildAiPrompt(body: AIQuestionRequest): string;
   screenQuestion(question: string, recentQuestions: string[]): { ok: boolean; reason?: string };
   hashValue(value: string): string;
@@ -159,7 +189,7 @@ export function createRuntime(overrides?: Partial<Pick<AppRuntime, "store" | "em
     emailProvider,
     aiProvider,
     generateOtpCode,
-    issueSession(userId, deviceName) {
+    async issueSession(userId, deviceName) {
       const now = new Date();
       const expiresAt = new Date(now.getTime() + env.ACCESS_TOKEN_TTL_SECONDS * 1000);
       const refreshExpiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
@@ -173,22 +203,22 @@ export function createRuntime(overrides?: Partial<Pick<AppRuntime, "store" | "em
         refreshExpiresAt: refreshExpiresAt.toISOString(),
         revokedAt: null,
       };
-      store.saveSession(session);
+      await store.saveSession(session);
       return session;
     },
-    refreshSession(refreshToken) {
-      const existing = store.getSessionByRefreshToken(refreshToken);
+    async refreshSession(refreshToken) {
+      const existing = await store.getSessionByRefreshToken(refreshToken);
       if (!existing) {
         return null;
       }
-      store.revokeSession(refreshToken);
+      await store.revokeSession(refreshToken);
       return runtime.issueSession(existing.userId, existing.deviceName);
     },
-    validateAccessToken(accessToken) {
+    async validateAccessToken(accessToken) {
       return store.getSessionByAccessToken(accessToken);
     },
-    revokeRefreshToken(refreshToken) {
-      store.revokeSession(refreshToken);
+    async revokeRefreshToken(refreshToken) {
+      await store.revokeSession(refreshToken);
     },
     buildAiPrompt(body) {
       const category = deckManifest.categories.find((entry) => entry.id === body.categoryId);

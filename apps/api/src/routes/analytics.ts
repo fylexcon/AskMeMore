@@ -14,10 +14,10 @@ export const analyticsRoutes: FastifyPluginAsync = async (app) => {
     const header = request.headers.authorization;
     const session =
       header?.startsWith("Bearer ")
-        ? app.runtime.validateAccessToken(header.slice("Bearer ".length))
+        ? await app.runtime.validateAccessToken(header.slice("Bearer ".length))
         : null;
 
-    app.runtime.store.appendAnalytics({
+    await app.runtime.store.appendAnalytics({
       eventName: body.eventName,
       platform: body.platform,
       metadata: body.metadata,

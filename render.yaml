@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: ask-me-more-api
+    env: node
+    region: ohio
+    plan: free
+    buildCommand: npm install && npx prisma generate --schema=apps/api/prisma/schema.prisma && npm run build -w @ask-me-more/api
+    startCommand: npm run start -w @ask-me-more/api
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ask-me-more-db
+          property: connectionString
+      - key: APP_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+
+databases:
+  - name: ask-me-more-db
+    databaseName: askmemore
+    user: admin
+    region: ohio
+    plan: free

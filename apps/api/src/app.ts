@@ -6,7 +6,7 @@ import { createRuntime, type AppRuntime, type AIProvider, type EmailProvider } f
 import { MemoryStore } from "./repositories/memory.js";
 
 export function buildApp(options?: {
-  store?: MemoryStore;
+  store?: import("./services/runtime.js").IStore;
   emailProvider?: EmailProvider;
   aiProvider?: AIProvider;
 }) {
@@ -20,7 +20,7 @@ export function buildApp(options?: {
     aiProvider: options?.aiProvider,
   });
 
-  app.decorate("runtime", runtime as AppRuntime);
+  app.decorate("runtime", runtime);
 
   app.setErrorHandler((error, _request, reply) => {
     if (!reply.sent) {

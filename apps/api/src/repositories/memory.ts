@@ -43,11 +43,11 @@ export class MemoryStore {
     return randomBytes(4).toString("hex");
   }
 
-  createOtp(email: string, code: string, deviceName: string, expiresAt: string) {
+  async createOtp(email: string, code: string, deviceName: string, expiresAt: string) {
     this.otps.set(email.toLowerCase(), { email: email.toLowerCase(), code, deviceName, expiresAt });
   }
 
-  validateOtp(email: string, code: string) {
+  async validateOtp(email: string, code: string) {
     const otp = this.otps.get(email.toLowerCase());
     if (!otp) {
       return false;
@@ -66,21 +66,21 @@ export class MemoryStore {
     return true;
   }
 
-  getOtp(email: string) {
+  async getOtp(email: string) {
     return this.otps.get(email.toLowerCase()) ?? null;
   }
 
-  findUserByEmail(email: string) {
+  async findUserByEmail(email: string) {
     const userId = this.usersByEmail.get(email.toLowerCase());
     return userId ? this.users.get(userId) ?? null : null;
   }
 
-  findUserById(userId: string) {
+  async findUserById(userId: string) {
     const user = this.users.get(userId);
     return user && !user.deletedAt ? user : null;
   }
 
-  upsertUser(email: string) {
+  async upsertUser(email: string) {
     const existing = this.findUserByEmail(email);
     if (existing) {
       return existing;
@@ -98,7 +98,7 @@ export class MemoryStore {
     return user;
   }
 
-  markUserDeleted(userId: string) {
+  async markUserDeleted(userId: string) {
     const user = this.users.get(userId);
     if (!user) {
       return;
@@ -107,12 +107,12 @@ export class MemoryStore {
     user.deletedAt = new Date().toISOString();
   }
 
-  saveSession(session: SessionRecord) {
+  async saveSession(session: SessionRecord) {
     this.sessionsByAccess.set(session.accessToken, session);
     this.sessionsByRefresh.set(session.refreshToken, session);
   }
 
-  getSessionByAccessToken(token: string) {
+  async getSessionByAccessToken(token: string) {
     const session = this.sessionsByAccess.get(token) ?? null;
     if (!session || session.revokedAt) {
       return null;
@@ -126,7 +126,7 @@ export class MemoryStore {
     return session;
   }
 
-  getSessionByRefreshToken(token: string) {
+  async getSessionByRefreshToken(token: string) {
     const session = this.sessionsByRefresh.get(token) ?? null;
     if (!session || session.revokedAt) {
       return null;
@@ -140,14 +140,14 @@ export class MemoryStore {
     return session;
   }
 
-  revokeSession(refreshToken: string) {
+  async revokeSession(refreshToken: string) {
     const session = this.sessionsByRefresh.get(refreshToken);
     if (session) {
       session.revokedAt = new Date().toISOString();
     }
   }
 
-  createRelationship(userId: string, displayName: string) {
+  async createRelationship(userId: string, displayName: string) {
     if (this.relationshipByUser.has(userId)) {
       const relationshipId = this.relationshipByUser.get(userId)!;
       return this.relationships.get(relationshipId) ?? null;
@@ -166,7 +166,7 @@ export class MemoryStore {
     return relationship;
   }
 
-  joinRelationship(userId: string, inviteCode: string) {
+  async joinRelationship(userId: string, inviteCode: string) {
     if (this.relationshipByUser.has(userId)) {
       return { error: "already_joined" as const };
     }
@@ -190,7 +190,7 @@ export class MemoryStore {
     return { relationship };
   }
 
-  getRelationshipForUser(userId: string) {
+  async getRelationshipForUser(userId: string) {
     const relationshipId = this.relationshipByUser.get(userId);
     if (!relationshipId) {
       return null;
@@ -208,15 +208,15 @@ export class MemoryStore {
     };
   }
 
-  getRelationshipIdForUser(userId: string) {
+  async getRelationshipIdForUser(userId: string) {
     return this.relationshipByUser.get(userId) ?? null;
   }
 
-  saveUnlockCode(code: UnlockCodeRecord) {
+  async saveUnlockCode(code: UnlockCodeRecord) {
     this.unlockCodes.set(code.code, code);
   }
 
-  redeemUnlockCode(code: string, userId: string, relationshipId: string) {
+  async redeemUnlockCode(code: string, userId: string, relationshipId: string) {
     const record = this.unlockCodes.get(code);
     if (!record) {
       return { error: "not_found" as const };
@@ -243,7 +243,7 @@ export class MemoryStore {
     return { expiresAt: expiresAt.toISOString() };
   }
 
-  setAdminEntitlement(relationshipId: string) {
+  async setAdminEntitlement(relationshipId: string) {
     this.entitlements.set(relationshipId, {
       relationshipId,
       source: "admin",
@@ -252,7 +252,7 @@ export class MemoryStore {
     });
   }
 
-  getEntitlement(relationshipId: string | null): EntitlementStatus {
+  async getEntitlement(relationshipId: string | null): Promise<EntitlementStatus> {
     if (!relationshipId) {
       return {
         relationshipId: null,
@@ -283,7 +283,7 @@ export class MemoryStore {
     };
   }
 
-  upsertProgress(userId: string, rollups: ProgressRollupInput[]) {
+  async upsertProgress(userId: string, rollups: ProgressRollupInput[]) {
     const syncedAt = new Date().toISOString();
     for (const rollup of rollups) {
       this.progress.set(`${userId}:${rollup.key}`, {
@@ -295,7 +295,7 @@ export class MemoryStore {
     return syncedAt;
   }
 
-  getProgressSummary(userId: string): ProgressSummary {
+  async getProgressSummary(userId: string): Promise<ProgressSummary> {
     const entries = Array.from(this.progress.values()).filter((entry) => entry.userId === userId);
     const perCategory = Object.fromEntries(
       deckManifest.categories.map((category) => [
@@ -341,23 +341,23 @@ export class MemoryStore {
     };
   }
 
-  appendAIRequest(record: AIRequestRecord) {
+  async appendAIRequest(record: AIRequestRecord) {
     this.aiRequests.push(record);
   }
 
-  appendAnalytics(record: AnalyticsEventRecord) {
+  async appendAnalytics(record: AnalyticsEventRecord) {
     this.analyticsEvents.push(record);
   }
 
-  appendReportedQuestion(record: ReportedQuestionRecord) {
+  async appendReportedQuestion(record: ReportedQuestionRecord) {
     this.reportedQuestions.push(record);
   }
 
-  setContentManifest(update: ContentManifestRecord) {
+  async setContentManifest(update: ContentManifestRecord) {
     this.contentManifest = update;
   }
 
-  setFeatureFlag(flag: FeatureFlagRecord) {
+  async setFeatureFlag(flag: FeatureFlagRecord) {
     this.featureFlags.set(flag.key, flag);
   }
 }

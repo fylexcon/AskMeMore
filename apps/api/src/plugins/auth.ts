@@ -8,9 +8,9 @@ async function requireAccessToken(request: FastifyRequest, reply: FastifyReply) 
   }
 
   const accessToken = header.slice("Bearer ".length);
-  const session = request.server.runtime.validateAccessToken(accessToken);
+  const session = await request.server.runtime.store.getSessionByAccessToken(accessToken);
   if (!session) {
-    return reply.code(401).send({ message: "Invalid session." });
+    return reply.code(401).send({ message: "Invalid or expired access token." });
   }
 
   request.viewer = { userId: session.userId };

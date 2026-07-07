@@ -21,8 +21,8 @@ export const aiRoutes: FastifyPluginAsync = async (app) => {
         return;
       }
 
-      const relationshipId = app.runtime.store.getRelationshipIdForUser(request.viewer.userId);
-      const entitlement = app.runtime.store.getEntitlement(relationshipId);
+      const relationshipId = await app.runtime.store.getRelationshipIdForUser(request.viewer.userId);
+      const entitlement = await app.runtime.store.getEntitlement(relationshipId);
       if (!entitlement.premiumUnlocked) {
         reply.code(403).send({ message: "Premium access is required for AI questions." });
         return;
@@ -51,7 +51,7 @@ export const aiRoutes: FastifyPluginAsync = async (app) => {
       const cleaned = question.replace(/^["']+|["']+$/g, "").trim();
       const screened = app.runtime.screenQuestion(cleaned, body.recentQuestions);
 
-      app.runtime.store.appendAIRequest({
+      await app.runtime.store.appendAIRequest({
         userId: request.viewer.userId,
         relationshipId,
         categoryId: body.categoryId,
