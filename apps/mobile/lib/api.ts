@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import type {
   AIQuestionRequest,
   AIQuestionResponse,
@@ -168,7 +169,7 @@ export async function postAnalytics(eventName: string, metadata: Record<string, 
       method: "POST",
       body: JSON.stringify({
         eventName,
-        platform: "ios",
+        platform: Platform.OS,
         metadata,
       }),
     },

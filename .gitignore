@@ -10,3 +10,14 @@ coverage
 apps/api/prisma/migrations
 apps/mobile/.expo
 .test-build
+
+# Build artifacts
+*.apk
+*.aab
+*.ipa
+android/
+ios/
+
+# OS files
+.DS_Store
+Thumbs.db

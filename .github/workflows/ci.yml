@@ -2,23 +2,18 @@ name: CI
 
 on:
   pull_request:
-    paths:
-      - "ask-me-more/**"
   workflow_dispatch:
 
 jobs:
   verify:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ask-me-more
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: ask-me-more/package-lock.json
+          cache-dependency-path: package-lock.json
       - run: npm install
       - run: npm run typecheck
       - run: npm run test

@@ -21,5 +21,5 @@ export const radii = {
 
 export const fonts = {
   display: "Georgia",
-  body: undefined,
+  body: "System",
 };

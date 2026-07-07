@@ -6,13 +6,41 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#3A0E22"
+    },
+    "ios": {
+      "bundleIdentifier": "com.fylexcon.askmemore",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "com.fylexcon.askmemore",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#3A0E22"
+      }
+    },
     "plugins": [
       "expo-router",
       "expo-secure-store",
       "expo-sqlite"
     ],
+    "web": {
+      "bundler": "metro"
+    },
     "experiments": {
       "typedRoutes": true
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
     }
   }
 }

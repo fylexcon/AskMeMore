@@ -8,7 +8,8 @@ import { deckManifest } from "@ask-me-more/content";
 import { colors } from "../lib/theme";
 import { useAppStore } from "../store/use-app-store";
 
-const quote = deckManifest.quotes[2];
+const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+const quote = deckManifest.quotes[dayOfYear % deckManifest.quotes.length];
 
 export default function HomeScreen() {
   const session = useAppStore((state) => state.session);

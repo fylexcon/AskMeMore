@@ -9,6 +9,7 @@
     "export": "expo export --platform all",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit",
+    "build:apk": "eas build -p android --profile preview",
     "test": "echo \"No mobile tests configured yet\""
   },
   "dependencies": {
