@@ -30,6 +30,8 @@ jobs:
       
       - name: Build Android APK (Local Runner)
         working-directory: ./apps/mobile
+        env:
+          EXPO_PUBLIC_API_URL: https://ask-me-more-api.onrender.com
         run: eas build --platform android --profile preview --non-interactive --local --output ../../AskMeMore.apk
         
       - name: Create GitHub Release
