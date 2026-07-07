@@ -15,6 +15,7 @@
     "dev:mobile": "npm run dev -w @ask-me-more/mobile"
   },
   "devDependencies": {
+    "expo-router": "^4.0.17",
     "typescript": "^5.6.3"
   },
   "dependencies": {
