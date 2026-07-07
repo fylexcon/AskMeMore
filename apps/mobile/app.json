@@ -19,7 +19,7 @@
     "android": {
       "package": "com.fylexcon.askmemore",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/adaptive-icon.jpg",
         "backgroundColor": "#3A0E22"
       }
     },
