@@ -39,8 +39,12 @@
     },
     "extra": {
       "eas": {
-        "projectId": ""
+        "projectId": "abc8309e-d26a-4b59-9f63-53391e110ee5"
+      },
+      "router": {
+        "origin": false
       }
-    }
+    },
+    "owner": "fyleexcon"
   }
 }
