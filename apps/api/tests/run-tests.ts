@@ -5,29 +5,25 @@ import { MemoryStore } from "../src/repositories/memory.js";
 
 async function testAuthRelationshipAndRedemption() {
   const store = new MemoryStore();
-  const sentOtps: Array<{ email: string; code: string }> = [];
   const app = buildApp({
     store,
     emailProvider: {
-      async sendOtp(email, code) {
-        sentOtps.push({ email, code });
-      },
+      async sendOtp() {},
     },
   });
 
-  await app.inject({
+  const register = await app.inject({
     method: "POST",
-    url: "/v1/auth/request-otp",
-    payload: { email: "alex@example.com", deviceName: "iPhone 16" },
+    url: "/v1/auth/register",
+    payload: { email: "alex@example.com", username: "alex", password: "password123", deviceName: "iPhone 16" },
   });
 
-  const otp = sentOtps[0]?.code;
-  assert.equal(otp?.length, 6);
+  assert.equal(register.statusCode, 200);
 
   const verify = await app.inject({
     method: "POST",
-    url: "/v1/auth/verify-otp",
-    payload: { email: "alex@example.com", code: otp, deviceName: "iPhone 16" },
+    url: "/v1/auth/login",
+    payload: { email: "alex@example.com", password: "password123", deviceName: "iPhone 16" },
   });
 
   if(verify.statusCode !== 200) console.log(verify.json()); assert.equal(verify.statusCode, 200);
@@ -76,12 +72,10 @@ async function testAiPremiumGate() {
     },
   });
 
-  store.createOtp("morgan@example.com", "123456", "Pixel", new Date(Date.now() + 600000).toISOString());
-
   const verify = await app.inject({
     method: "POST",
-    url: "/v1/auth/verify-otp",
-    payload: { email: "morgan@example.com", code: "123456", deviceName: "Pixel" },
+    url: "/v1/auth/register",
+    payload: { email: "morgan@example.com", username: "morgan", password: "password123", deviceName: "Pixel" },
   });
 
   const accessToken = verify.json().tokens.accessToken;
@@ -140,11 +134,10 @@ async function testProgressSync() {
     },
   });
 
-  store.createOtp("jamie@example.com", "654321", "Android", new Date(Date.now() + 600000).toISOString());
   const verify = await app.inject({
     method: "POST",
-    url: "/v1/auth/verify-otp",
-    payload: { email: "jamie@example.com", code: "654321", deviceName: "Android" },
+    url: "/v1/auth/register",
+    payload: { email: "jamie@example.com", username: "jamie", password: "password123", deviceName: "Android" },
   });
 
   const accessToken = verify.json().tokens.accessToken;
