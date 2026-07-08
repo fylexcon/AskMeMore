@@ -29,49 +29,31 @@ export const prisma = new PrismaClient({ adapter });
 export class PrismaStore implements IStore {
   contentManifest?: ContentManifestRecord;
 
-  async createOtp(email: string, code: string, deviceName: string, expiresAt: string): Promise<void> {
-    await prisma.emailOtp.create({
+  async createUser(email: string, username: string, passwordHash: string): Promise<UserRecord> {
+    const user = await prisma.user.create({
       data: {
         email: email.toLowerCase(),
-        code,
-        deviceName,
-        expiresAt: new Date(expiresAt),
+        username,
+        passwordHash,
       },
     });
-  }
-
-  async validateOtp(email: string, code: string): Promise<boolean> {
-    const otps = await prisma.emailOtp.findMany({
-      where: { email: email.toLowerCase() },
-      orderBy: { createdAt: "desc" },
-    });
-    const otp = otps[0];
-    if (!otp) return false;
-
-    if (otp.expiresAt.getTime() < Date.now()) {
-      await prisma.emailOtp.delete({ where: { id: otp.id } });
-      return false;
-    }
-
-    if (otp.code !== code) return false;
-
-    await prisma.emailOtp.deleteMany({ where: { email: email.toLowerCase() } });
-    return true;
-  }
-
-  async getOtp(email: string): Promise<OtpRecord | null> {
-    const otps = await prisma.emailOtp.findMany({
-      where: { email: email.toLowerCase() },
-      orderBy: { createdAt: "desc" },
-      take: 1,
-    });
-    const otp = otps[0];
-    if (!otp) return null;
     return {
-      email: otp.email,
-      code: otp.code,
-      deviceName: otp.deviceName,
-      expiresAt: otp.expiresAt.toISOString(),
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      createdAt: user.createdAt.toISOString(),
+      deletedAt: user.deletedAt?.toISOString() ?? null,
+    };
+  }
+
+  async getUserAuth(email: string): Promise<{ id: string; passwordHash: string | null } | null> {
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+    if (!user || user.deletedAt) return null;
+    return {
+      id: user.id,
+      passwordHash: user.passwordHash,
     };
   }
 
@@ -83,6 +65,7 @@ export class PrismaStore implements IStore {
     return {
       id: user.id,
       email: user.email,
+      username: user.username,
       createdAt: user.createdAt.toISOString(),
       deletedAt: null,
     };
@@ -94,21 +77,9 @@ export class PrismaStore implements IStore {
     return {
       id: user.id,
       email: user.email,
+      username: user.username,
       createdAt: user.createdAt.toISOString(),
       deletedAt: null,
-    };
-  }
-
-  async upsertUser(email: string): Promise<UserRecord> {
-    let user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
-    if (!user) {
-      user = await prisma.user.create({ data: { email: email.toLowerCase() } });
-    }
-    return {
-      id: user.id,
-      email: user.email,
-      createdAt: user.createdAt.toISOString(),
-      deletedAt: user.deletedAt?.toISOString() ?? null,
     };
   }
 

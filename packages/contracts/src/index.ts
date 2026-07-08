@@ -7,6 +7,18 @@ export const categoryIds = [
   "deeper",
   "values",
   "intimacy",
+  "childhood",
+  "fears",
+  "spiritual",
+  "whatifs",
+  "popculture",
+  "money",
+  "travel",
+  "friendships",
+  "nostalgia",
+  "conflict",
+  "work",
+  "spicy",
 ] as const;
 
 export const depthLevels = ["light", "moderate", "deep"] as const;
@@ -44,6 +56,7 @@ export const DeckManifestSchema = z.object({
 export const UserProfileSchema = z.object({
   id: z.string(),
   email: z.string().email(),
+  username: z.string().nullable(),
   relationshipId: z.string().nullable(),
   createdAt: z.string(),
 });
@@ -92,14 +105,16 @@ export const AIQuestionResponseSchema = z.object({
   generatedAt: z.string(),
 });
 
-export const RequestOtpSchema = z.object({
+export const RegisterSchema = z.object({
   email: z.string().email(),
+  username: z.string().min(3).max(30),
+  password: z.string().min(6),
   deviceName: z.string().min(2).max(80),
 });
 
-export const VerifyOtpSchema = z.object({
+export const LoginSchema = z.object({
   email: z.string().email(),
-  code: z.string().length(6),
+  password: z.string().min(6),
   deviceName: z.string().min(2).max(80),
 });
 

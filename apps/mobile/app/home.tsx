@@ -94,7 +94,7 @@ export default function HomeScreen() {
                 ]}
               >
                 <View style={styles.deckTitleRow}>
-                  <Feather name="message-circle" size={18} color={locked ? "#C5B8B0" : category.accentColor} />
+                  <Feather name={category.iconKey as any} size={18} color={locked ? "#C5B8B0" : category.accentColor} />
                   {locked ? <Text style={styles.lockedTag}>Premium</Text> : null}
                 </View>
                 <Text style={[styles.deckTitle, locked && { color: "#A09590" }]}>{category.label}</Text>

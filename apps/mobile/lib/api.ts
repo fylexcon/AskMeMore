@@ -40,17 +40,18 @@ async function request<T>(path: string, options?: RequestInit, accessToken?: str
   return (await response.json()) as T;
 }
 
-export async function requestOtp(email: string, deviceName: string) {
-  return request<{ sent: boolean; expiresInSeconds: number }>("/v1/auth/request-otp", {
+export async function register(email: string, username: string, password: string, deviceName: string) {
+  const payload = await request<AuthSession>("/v1/auth/register", {
     method: "POST",
-    body: JSON.stringify({ email, deviceName }),
+    body: JSON.stringify({ email, username, password, deviceName }),
   });
+  return AuthSessionSchema.parse(payload);
 }
 
-export async function verifyOtp(email: string, code: string, deviceName: string) {
-  const payload = await request<AuthSession>("/v1/auth/verify-otp", {
+export async function login(email: string, password: string, deviceName: string) {
+  const payload = await request<AuthSession>("/v1/auth/login", {
     method: "POST",
-    body: JSON.stringify({ email, code, deviceName }),
+    body: JSON.stringify({ email, password, deviceName }),
   });
   return AuthSessionSchema.parse(payload);
 }

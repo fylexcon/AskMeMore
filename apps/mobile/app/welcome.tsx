@@ -26,8 +26,8 @@ export default function WelcomeScreen() {
           </Text>
         </View>
 
-        <PrimaryButton label="Continue with email" onPress={() => router.push("/auth/email")} />
-        <Pressable onPress={() => router.push("/auth/email")}>
+        <PrimaryButton label="Continue with email" onPress={() => router.push("/auth" as any)} />
+        <Pressable onPress={() => router.push("/auth" as any)}>
           <Text style={styles.secondaryLink}>Sign in to start your first session</Text>
         </Pressable>
       </View>

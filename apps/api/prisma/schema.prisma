@@ -9,6 +9,8 @@ datasource db {
 model User {
   id          String            @id @default(uuid())
   email       String            @unique
+  username    String?           @unique
+  passwordHash String?
   createdAt   DateTime          @default(now())
   deletedAt   DateTime?
   devices     Device[]

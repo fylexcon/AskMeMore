@@ -22,12 +22,10 @@ export type AIProvider = {
 };
 
 export interface IStore {
-  createOtp(email: string, code: string, deviceName: string, expiresAt: string): Promise<void>;
-  validateOtp(email: string, code: string): Promise<boolean>;
-  getOtp(email: string): Promise<SessionRecord | any>; // Will just use types from there
+  createUser(email: string, username: string, passwordHash: string): Promise<any>;
+  getUserAuth(email: string): Promise<{ id: string; passwordHash: string | null } | null>;
   findUserByEmail(email: string): Promise<any>;
   findUserById(userId: string): Promise<any>;
-  upsertUser(email: string): Promise<any>;
   markUserDeleted(userId: string): Promise<void>;
   saveSession(session: SessionRecord): Promise<void>;
   getSessionByAccessToken(token: string): Promise<SessionRecord | null>;

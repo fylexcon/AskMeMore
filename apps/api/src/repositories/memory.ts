@@ -43,33 +43,6 @@ export class MemoryStore {
     return randomBytes(4).toString("hex");
   }
 
-  async createOtp(email: string, code: string, deviceName: string, expiresAt: string) {
-    this.otps.set(email.toLowerCase(), { email: email.toLowerCase(), code, deviceName, expiresAt });
-  }
-
-  async validateOtp(email: string, code: string) {
-    const otp = this.otps.get(email.toLowerCase());
-    if (!otp) {
-      return false;
-    }
-
-    if (new Date(otp.expiresAt).getTime() < Date.now()) {
-      this.otps.delete(email.toLowerCase());
-      return false;
-    }
-
-    if (otp.code !== code) {
-      return false;
-    }
-
-    this.otps.delete(email.toLowerCase());
-    return true;
-  }
-
-  async getOtp(email: string) {
-    return this.otps.get(email.toLowerCase()) ?? null;
-  }
-
   async findUserByEmail(email: string) {
     const userId = this.usersByEmail.get(email.toLowerCase());
     return userId ? this.users.get(userId) ?? null : null;
@@ -80,22 +53,30 @@ export class MemoryStore {
     return user && !user.deletedAt ? user : null;
   }
 
-  async upsertUser(email: string) {
+  async createUser(email: string, username: string, passwordHash: string) {
     const existing = await this.findUserByEmail(email);
     if (existing) {
-      return existing;
+      throw new Error("Email already registered");
     }
 
     const user: UserRecord = {
       id: randomUUID(),
       email: email.toLowerCase(),
+      username,
       createdAt: new Date().toISOString(),
       deletedAt: null,
     };
 
     this.users.set(user.id, user);
     this.usersByEmail.set(user.email, user.id);
+    (user as any).passwordHash = passwordHash;
     return user;
+  }
+
+  async getUserAuth(email: string) {
+    const user = await this.findUserByEmail(email);
+    if (!user) return null;
+    return { id: user.id, passwordHash: (user as any).passwordHash ?? null };
   }
 
   async markUserDeleted(userId: string) {

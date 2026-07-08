@@ -149,7 +149,7 @@ export default function SessionScreen() {
           >
             {!revealed ? (
               <View style={styles.cardFront}>
-                <Feather name={aiQuestion ? "star" : "message-circle"} size={42} color="#FFFFFF" />
+                <Feather name={aiQuestion ? "star" : (category.iconKey as any)} size={42} color="#FFFFFF" />
                 <Text style={styles.cardFrontTitle}>{aiQuestion ? "AI question ready" : "Tap to reveal your question"}</Text>
                 <Text style={styles.cardFrontCopy}>{category.description}</Text>
               </View>
