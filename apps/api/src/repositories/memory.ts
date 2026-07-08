@@ -81,7 +81,7 @@ export class MemoryStore {
   }
 
   async upsertUser(email: string) {
-    const existing = this.findUserByEmail(email);
+    const existing = await this.findUserByEmail(email);
     if (existing) {
       return existing;
     }
