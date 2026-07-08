@@ -19,7 +19,15 @@ jobs:
       - run: npm install
       - run: npm run test
       - run: npm run build
-      - name: Deploy API to Railway
-        run: echo "Configure Railway deployment and secrets here."
-      - name: Publish Expo preview build
-        run: echo "Configure EAS preview builds here."
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Publish Expo Update
+        working-directory: ./apps/mobile
+        run: eas update --branch main --message "Automated update from CI" --non-interactive
+      - name: Build Android Preview
+        working-directory: ./apps/mobile
+        run: eas build --platform android --profile preview --non-interactive
