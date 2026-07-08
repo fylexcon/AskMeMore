@@ -26,48 +26,52 @@ export default function RootLayout() {
     let active = true;
 
     const bootstrap = async () => {
-      await initializeLocalDatabase();
+      try {
+        await initializeLocalDatabase();
 
-      const persisted = await loadPersistedSession();
-      const snapshot = await loadLocalSnapshot();
-      if (!active) {
-        return;
-      }
-
-      setSession(persisted.session);
-      setRelationship(persisted.relationship ?? null);
-      setEntitlement(persisted.entitlement ?? null);
-      setLocalSummary(snapshot.summary);
-      setRecentByCategory(snapshot.recentByCategory);
-
-      if (persisted.session) {
-        try {
-          await flushPendingProgress(persisted.session.tokens.accessToken);
-          const [relationship, entitlement] = await Promise.all([
-            fetchRelationship(persisted.session.tokens.accessToken),
-            fetchEntitlement(persisted.session.tokens.accessToken),
-          ]);
-
-          if (!active) {
-            return;
-          }
-
-          setRelationship(relationship);
-          setEntitlement(entitlement);
-          await Promise.all([
-            persistRelationship(relationship),
-            persistEntitlement(entitlement),
-          ]);
-        } catch (_error) {
-          await clearPersistedSession();
-          setSession(null);
-          setRelationship(null);
-          setEntitlement(null);
+        const persisted = await loadPersistedSession();
+        const snapshot = await loadLocalSnapshot();
+        if (!active) {
+          return;
         }
-      }
 
-      if (active) {
-        setHydrated(true);
+        setSession(persisted.session);
+        setRelationship(persisted.relationship ?? null);
+        setEntitlement(persisted.entitlement ?? null);
+        setLocalSummary(snapshot.summary);
+        setRecentByCategory(snapshot.recentByCategory);
+
+        if (persisted.session) {
+          try {
+            await flushPendingProgress(persisted.session.tokens.accessToken);
+            const [relationship, entitlement] = await Promise.all([
+              fetchRelationship(persisted.session.tokens.accessToken),
+              fetchEntitlement(persisted.session.tokens.accessToken),
+            ]);
+
+            if (!active) {
+              return;
+            }
+
+            setRelationship(relationship);
+            setEntitlement(entitlement);
+            await Promise.all([
+              persistRelationship(relationship),
+              persistEntitlement(entitlement),
+            ]);
+          } catch (_error) {
+            await clearPersistedSession();
+            setSession(null);
+            setRelationship(null);
+            setEntitlement(null);
+          }
+        }
+      } catch (error) {
+        console.error("Critical bootstrap error:", error);
+      } finally {
+        if (active) {
+          setHydrated(true);
+        }
       }
     };
 

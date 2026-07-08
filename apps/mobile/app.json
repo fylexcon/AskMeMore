@@ -1,5 +1,6 @@
 {
   "expo": {
+    "newArchEnabled": false,
     "name": "Ask Me More",
     "slug": "ask-me-more",
     "scheme": "askmemore",
