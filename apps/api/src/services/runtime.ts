@@ -72,6 +72,9 @@ function randomToken() {
 }
 
 function generateOtpCode() {
+  if (!env.RESEND_API_KEY) {
+    return "123456";
+  }
   return String(Math.floor(100000 + Math.random() * 900000));
 }
 

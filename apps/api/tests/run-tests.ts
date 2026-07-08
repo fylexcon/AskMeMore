@@ -30,7 +30,7 @@ async function testAuthRelationshipAndRedemption() {
     payload: { email: "alex@example.com", code: otp, deviceName: "iPhone 16" },
   });
 
-  assert.equal(verify.statusCode, 200);
+  if(verify.statusCode !== 200) console.log(verify.json()); assert.equal(verify.statusCode, 200);
   const session = verify.json();
 
   const relationship = await app.inject({
