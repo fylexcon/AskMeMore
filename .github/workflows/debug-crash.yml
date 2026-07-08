@@ -1,0 +1,47 @@
+name: Debug Android Crash
+
+on:
+  workflow_dispatch:
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+          
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          
+      - run: npm install --legacy-peer-deps
+      
+      - name: Build Android APK
+        working-directory: ./apps/mobile
+        run: eas build --platform android --profile preview --non-interactive --local --output ../../AskMeMore.apk
+        
+      - name: Run Emulator and Capture Logcat
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          target: default
+          arch: x86_64
+          profile: pixel
+          script: |
+            adb install AskMeMore.apk
+            adb shell monkey -p com.fylexcon.askmemore -c android.intent.category.LAUNCHER 1
+            sleep 10
+            adb logcat -d > logcat.txt
+            
+      - name: Upload Logcat
+        uses: actions/upload-artifact@v4
+        with:
+          name: crash-logcat
+          path: logcat.txt
