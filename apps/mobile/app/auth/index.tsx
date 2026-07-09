@@ -131,11 +131,13 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: "700",
-    color: colors.text,
+    color: colors.textDim,
     marginBottom: -8,
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
   input: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surfaceHighlight,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 16,
@@ -151,7 +153,7 @@ const styles = StyleSheet.create({
   toggleText: {
     fontSize: 15,
     fontWeight: "600",
-    color: colors.plum,
+    color: colors.gold,
     textAlign: "center",
   },
 });

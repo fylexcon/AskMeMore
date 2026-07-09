@@ -10,8 +10,9 @@ import { deckManifest, seededDeckMap } from "@ask-me-more/content";
 import { generateAiQuestion } from "../../lib/api";
 import { loadLocalSnapshot, recordAnsweredQuestion } from "../../lib/local-db";
 import { flushPendingProgress } from "../../lib/sync";
-import { colors } from "../../lib/theme";
+import { colors, radii, shadows } from "../../lib/theme";
 import { useAppStore } from "../../store/use-app-store";
+import { LinearGradient } from "expo-linear-gradient";
 
 function toParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] ?? "" : value ?? "";
@@ -116,7 +117,7 @@ export default function SessionScreen() {
     <View style={styles.screen}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.headerBack}>
-          <Feather name="arrow-left" size={18} color={colors.muted} />
+          <Feather name="arrow-left" size={18} color={colors.textDim} />
         </Pressable>
         <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle}>{category.label}</Text>
@@ -134,30 +135,37 @@ export default function SessionScreen() {
           from={{ opacity: 0, translateY: 14 }}
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: "timing", duration: 320 }}
+          style={shadows.soft}
         >
-          <Pressable
-            onPress={() => setRevealed((current) => !current)}
-            style={[
-              styles.card,
-              revealed
-                ? styles.cardBack
-                : {
-                    backgroundColor: category.accentColor,
-                    borderColor: category.accentColor,
-                  },
-            ]}
-          >
-            {!revealed ? (
-              <View style={styles.cardFront}>
-                <Feather name={aiQuestion ? "star" : (category.iconKey as any)} size={42} color="#FFFFFF" />
-                <Text style={styles.cardFrontTitle}>{aiQuestion ? "AI question ready" : "Tap to reveal your question"}</Text>
-                <Text style={styles.cardFrontCopy}>{category.description}</Text>
-              </View>
-            ) : (
-              <View style={styles.cardBackContent}>
-                <Text style={styles.cardQuote}>{currentQuestion}</Text>
-                {aiQuestion ? <Text style={styles.aiBadge}>AI-crafted for this session</Text> : null}
-              </View>
+          <Pressable onPress={() => setRevealed((current) => !current)}>
+            {({ pressed }) => (
+              <LinearGradient
+                colors={
+                  revealed
+                    ? [colors.surfaceHighlight, colors.surface]
+                    : [category.accentColor, category.accentColor + "99"]
+                }
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={[
+                  styles.card,
+                  revealed ? styles.cardBack : styles.cardFrontBg,
+                  pressed && { opacity: 0.8 },
+                ]}
+              >
+                {!revealed ? (
+                  <View style={styles.cardFrontContent}>
+                    <Feather name={aiQuestion ? "star" : (category.iconKey as any)} size={48} color="#FFFFFF" />
+                    <Text style={styles.cardFrontTitle}>{aiQuestion ? "AI question ready" : "Tap to reveal your question"}</Text>
+                    <Text style={styles.cardFrontCopy}>{category.description}</Text>
+                  </View>
+                ) : (
+                  <View style={styles.cardBackContent}>
+                    <Text style={styles.cardQuote}>{currentQuestion}</Text>
+                    {aiQuestion ? <Text style={styles.aiBadge}>AI-crafted for this session</Text> : null}
+                  </View>
+                )}
+              </LinearGradient>
             )}
           </Pressable>
         </MotiView>
@@ -175,7 +183,7 @@ export default function SessionScreen() {
                 style={[
                   styles.depthPill,
                   {
-                    backgroundColor: depth === option ? category.accentColor : "#F0EAE4",
+                    backgroundColor: depth === option ? category.accentColor : colors.surfaceHighlight,
                   },
                 ]}
               >
@@ -189,14 +197,14 @@ export default function SessionScreen() {
       </ScrollView>
 
       <View style={styles.bottomBar}>
-        <Pressable onPress={() => void handleAdvance()} style={[styles.nextButton, { backgroundColor: revealed ? category.accentColor : "#F0EAE4" }]}>
-          <Text style={[styles.nextButtonText, { color: revealed ? "#FFFFFF" : colors.muted }]}>
+        <Pressable onPress={() => void handleAdvance()} style={[styles.nextButton, { backgroundColor: revealed ? category.accentColor : colors.surfaceHighlight }]}>
+          <Text style={[styles.nextButtonText, { color: revealed ? "#FFFFFF" : colors.textDim }]}>
             {revealed ? (isLastSeededCard && !aiQuestion ? "Finish" : "Next card") : "Skip"}
           </Text>
         </Pressable>
 
         <Pressable onPress={() => void handleAiGenerate()} style={styles.aiButton} disabled={aiLoading}>
-          <Feather name={aiLoading ? "loader" : "star"} size={18} color={colors.gold} />
+          <Feather name={aiLoading ? "loader" : "star"} size={20} color={colors.gold} />
         </Pressable>
       </View>
     </View>
@@ -206,7 +214,7 @@ export default function SessionScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.cream,
+    backgroundColor: colors.background,
   },
   header: {
     paddingTop: 54,
@@ -215,28 +223,30 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
   headerBack: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: "#F5EEE8",
+    width: 44,
+    height: 44,
+    borderRadius: radii.md,
+    backgroundColor: colors.surfaceHighlight,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   headerTitle: {
     color: colors.text,
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "800",
     marginBottom: 6,
   },
   headerTrack: {
     height: 4,
     borderRadius: 999,
-    backgroundColor: "#F0EAE4",
+    backgroundColor: colors.surfaceHighlight,
     overflow: "hidden",
   },
   headerFill: {
@@ -244,7 +254,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   headerCount: {
-    color: colors.muted,
+    color: colors.textDim,
     fontWeight: "700",
   },
   container: {
@@ -252,41 +262,44 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   card: {
-    minHeight: 360,
-    borderRadius: 24,
-    borderWidth: 2,
-    padding: 28,
+    minHeight: 380,
+    borderRadius: radii.xl,
+    padding: 32,
     justifyContent: "center",
+    borderWidth: 1,
   },
-  cardFront: {
+  cardFrontBg: {
+    borderColor: colors.glassBorder,
+  },
+  cardFrontContent: {
     alignItems: "center",
-    gap: 18,
+    gap: 20,
   },
   cardFrontTitle: {
     color: "#FFFFFF",
-    fontSize: 19,
+    fontSize: 22,
     fontWeight: "800",
     textAlign: "center",
   },
   cardFrontCopy: {
-    color: "rgba(255,255,255,0.72)",
+    color: "rgba(255,255,255,0.75)",
     textAlign: "center",
-    lineHeight: 20,
+    lineHeight: 22,
+    fontSize: 15,
   },
   cardBack: {
-    backgroundColor: colors.paper,
     borderColor: colors.border,
   },
   cardBackContent: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    gap: 18,
+    gap: 20,
   },
   cardQuote: {
     color: colors.text,
-    fontSize: 22,
-    lineHeight: 34,
+    fontSize: 24,
+    lineHeight: 36,
     fontStyle: "italic",
     textAlign: "center",
     fontFamily: "Georgia",
@@ -295,24 +308,27 @@ const styles = StyleSheet.create({
     color: colors.gold,
     fontSize: 12,
     fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
   depthCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
+    backgroundColor: colors.surface,
+    borderRadius: radii.lg,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: 16,
+    padding: 20,
+    ...shadows.soft,
   },
   depthHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10,
+    marginBottom: 12,
   },
   depthLabel: {
     color: colors.muted,
     fontSize: 11,
     fontWeight: "800",
-    letterSpacing: 1.4,
+    letterSpacing: 1.5,
   },
   depthValue: {
     color: colors.text,
@@ -326,47 +342,51 @@ const styles = StyleSheet.create({
   },
   depthPill: {
     flex: 1,
-    height: 38,
-    borderRadius: 12,
+    height: 42,
+    borderRadius: radii.md,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
   },
   depthPillText: {
-    color: colors.muted,
+    color: colors.textDim,
     fontWeight: "800",
     textTransform: "capitalize",
   },
   errorText: {
     color: colors.danger,
     textAlign: "center",
+    marginTop: 10,
   },
   bottomBar: {
     padding: 20,
     flexDirection: "row",
-    gap: 10,
-    backgroundColor: "#FFFFFF",
+    gap: 12,
+    backgroundColor: colors.surface,
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
   nextButton: {
     flex: 1,
-    height: 54,
-    borderRadius: 16,
+    height: 56,
+    borderRadius: radii.md,
     alignItems: "center",
     justifyContent: "center",
   },
   nextButtonText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "800",
+    letterSpacing: 0.5,
   },
   aiButton: {
-    width: 54,
-    height: 54,
-    borderRadius: 16,
+    width: 56,
+    height: 56,
+    borderRadius: radii.md,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(201,168,76,0.12)",
+    backgroundColor: "rgba(229,192,123,0.12)",
     borderWidth: 1,
-    borderColor: "rgba(201,168,76,0.35)",
+    borderColor: "rgba(229,192,123,0.35)",
   },
 });

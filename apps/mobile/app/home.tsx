@@ -5,8 +5,9 @@ import { Feather } from "@expo/vector-icons";
 
 import { AppShell, ScreenCard, SectionTitle, StatPill } from "../components/ui";
 import { deckManifest } from "@ask-me-more/content";
-import { colors } from "../lib/theme";
+import { colors, fonts, radii, shadows } from "../lib/theme";
 import { useAppStore } from "../store/use-app-store";
+import { LinearGradient } from "expo-linear-gradient";
 
 const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
 const quote = deckManifest.quotes[dayOfYear % deckManifest.quotes.length];
@@ -85,51 +86,71 @@ export default function HomeScreen() {
                         params: { categoryId: category.id },
                       })
                 }
-                style={[
-                  styles.deckCard,
-                  {
-                    backgroundColor: locked ? "#F8F4F1" : category.backgroundColor,
-                    borderColor: locked ? colors.border : `${category.accentColor}33`,
-                  },
-                ]}
               >
-                <View style={styles.deckTitleRow}>
-                  <Feather name={category.iconKey as any} size={18} color={locked ? "#C5B8B0" : category.accentColor} />
-                  {locked ? <Text style={styles.lockedTag}>Premium</Text> : null}
-                </View>
-                <Text style={[styles.deckTitle, locked && { color: "#A09590" }]}>{category.label}</Text>
-                <Text style={[styles.deckDescription, locked && { color: "#C0B8B2" }]}>{category.description}</Text>
-                {locked ? (
-                  <Text style={styles.lockedCopy}>Unlock AI, insights, and emotionally deeper decks.</Text>
-                ) : (
-                  <>
-                    <View style={styles.progressTrack}>
-                      <View style={[styles.progressFill, { width: progressWidth, backgroundColor: category.accentColor }]} />
-                    </View>
-                    <Text style={styles.progressCopy}>
-                      {progress.answeredCount}/{category.totalQuestions} explored
-                    </Text>
-                  </>
+                {({ pressed }) => (
+                  <View style={[styles.deckCardWrapper, pressed && { opacity: 0.8 }]}>
+                    <LinearGradient
+                      colors={
+                        locked
+                          ? [colors.surfaceHighlight, colors.surface]
+                          : [`${category.accentColor}33`, colors.surface]
+                      }
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={[
+                        styles.deckCard,
+                        {
+                          borderColor: locked ? colors.glassBorder : `${category.accentColor}50`,
+                        },
+                      ]}
+                    >
+                      <View style={styles.deckTitleRow}>
+                        <Feather name={category.iconKey as any} size={20} color={locked ? colors.muted : category.accentColor} />
+                        {locked ? <Text style={styles.lockedTag}>Premium</Text> : null}
+                      </View>
+                      <Text style={[styles.deckTitle, locked && { color: colors.textDim }]}>{category.label}</Text>
+                      <Text style={[styles.deckDescription, locked && { color: colors.muted }]}>{category.description}</Text>
+                      {locked ? (
+                        <Text style={styles.lockedCopy}>Unlock AI, insights, and emotionally deeper decks.</Text>
+                      ) : (
+                        <>
+                          <View style={styles.progressTrack}>
+                            <View style={[styles.progressFill, { width: progressWidth, backgroundColor: category.accentColor }]} />
+                          </View>
+                          <Text style={styles.progressCopy}>
+                            {progress.answeredCount}/{category.totalQuestions} explored
+                          </Text>
+                        </>
+                      )}
+                    </LinearGradient>
+                  </View>
                 )}
               </Pressable>
             );
           })}
         </View>
 
-        <ScreenCard backgroundColor="rgba(255,252,248,0.96)">
+        <ScreenCard backgroundColor={colors.surfaceHighlight}>
           <Text style={styles.quoteEyebrow}>DAILY REFLECTION</Text>
           <Text style={styles.quoteText}>"{quote.text}"</Text>
           <Text style={styles.quoteAuthor}>- {quote.author}</Text>
         </ScreenCard>
 
         {!premiumUnlocked ? (
-          <Pressable onPress={() => router.push("/premium")} style={styles.unlockButton}>
-            <Text style={styles.unlockButtonText}>Unlock premium with an access code</Text>
+          <Pressable onPress={() => router.push("/premium")} style={({ pressed }) => [styles.unlockButton, pressed && { opacity: 0.8 }]}>
+            <LinearGradient
+              colors={[colors.gold, "#B89645"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.unlockGradient}
+            >
+              <Text style={styles.unlockButtonText}>Unlock premium with an access code</Text>
+            </LinearGradient>
           </Pressable>
         ) : (
-          <ScreenCard backgroundColor="rgba(201,168,76,0.12)">
+          <ScreenCard backgroundColor="rgba(229,192,123,0.12)" accentColor={colors.gold}>
             <Text style={styles.memberTitle}>Premium unlocked</Text>
-            <Text style={styles.memberCopy}>AI prompts and all six decks are available for your relationship.</Text>
+            <Text style={styles.memberCopy}>AI prompts and all decks are available for your relationship.</Text>
           </ScreenCard>
         )}
       </ScrollView>
@@ -138,6 +159,13 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  unlockGradient: {
+    paddingHorizontal: 20,
+    height: "100%",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   container: {
     paddingBottom: 36,
     gap: 18,
@@ -148,18 +176,20 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   eyebrow: {
-    color: "rgba(255,255,255,0.6)",
-    fontSize: 11,
+    color: "rgba(255,255,255,0.7)",
+    fontSize: 12,
     fontWeight: "800",
     letterSpacing: 2.5,
   },
   iconButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: "rgba(255,255,255,0.14)",
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
   },
   statsRow: {
     flexDirection: "row",
@@ -168,13 +198,15 @@ const styles = StyleSheet.create({
   },
   insightsPill: {
     minWidth: 110,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.14)",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: radii.md,
+    backgroundColor: "rgba(255,255,255,0.12)",
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
   },
   insightsLabel: {
     color: "#FFFFFF",
@@ -187,13 +219,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   bannerCopy: {
-    color: "rgba(255,255,255,0.75)",
-    lineHeight: 20,
-    marginBottom: 10,
+    color: colors.textDim,
+    lineHeight: 22,
+    marginBottom: 12,
   },
   bannerLink: {
-    color: "#FFFFFF",
+    color: colors.gold,
     fontWeight: "800",
+    letterSpacing: 0.5,
   },
   sectionHeader: {
     paddingHorizontal: 4,
@@ -202,48 +235,56 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   sectionTitle: {
-    color: "#FFFFFF",
-    fontSize: 17,
+    color: colors.text,
+    fontSize: 18,
     fontWeight: "800",
   },
   sectionBadge: {
-    color: "rgba(255,255,255,0.78)",
+    color: colors.textDim,
     fontSize: 11,
-    fontWeight: "700",
-    backgroundColor: "rgba(255,255,255,0.1)",
+    fontWeight: "800",
+    backgroundColor: colors.surfaceHighlight,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 20,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   deckGrid: {
-    gap: 12,
+    gap: 16,
+  },
+  deckCardWrapper: {
+    borderRadius: radii.lg,
+    ...shadows.soft,
   },
   deckCard: {
-    borderRadius: 20,
-    padding: 18,
+    borderRadius: radii.lg,
+    padding: 20,
     borderWidth: 1,
   },
   deckTitleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10,
+    marginBottom: 12,
   },
   lockedTag: {
-    color: colors.plum,
+    color: colors.muted,
     fontSize: 11,
     fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
   deckTitle: {
     color: colors.text,
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "800",
-    marginBottom: 4,
+    marginBottom: 6,
   },
   deckDescription: {
-    color: colors.muted,
-    fontSize: 13,
-    lineHeight: 20,
-    marginBottom: 16,
+    color: colors.textDim,
+    fontSize: 14,
+    lineHeight: 22,
+    marginBottom: 18,
   },
   lockedCopy: {
     color: colors.muted,

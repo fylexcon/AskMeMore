@@ -3,7 +3,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { MotiView } from "moti";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
-import { colors, fonts, radii } from "../lib/theme";
+import { colors, fonts, radii, shadows } from "../lib/theme";
 
 export function AppShell(props: {
   children: ReactNode;
@@ -37,8 +37,8 @@ export function ScreenCard(props: {
       style={[
         styles.card,
         {
-          borderColor: props.accentColor ? `${props.accentColor}33` : colors.border,
-          backgroundColor: props.backgroundColor ?? "#FFFFFF",
+          borderColor: props.accentColor ? `${props.accentColor}40` : colors.glassBorder,
+          backgroundColor: props.backgroundColor ?? colors.surface,
         },
       ]}
     >
@@ -58,12 +58,13 @@ export function PrimaryButton(props: {
     <Pressable
       disabled={props.disabled}
       onPress={props.onPress}
-      style={[
+      style={({ pressed }) => [
         styles.button,
         tone === "primary" && styles.primaryButton,
         tone === "secondary" && styles.secondaryButton,
         tone === "ghost" && styles.ghostButton,
         props.disabled && styles.disabledButton,
+        pressed && { opacity: 0.8 },
       ]}
     >
       <Text
@@ -81,7 +82,7 @@ export function PrimaryButton(props: {
 
 export function SectionTitle(props: { title: string; subtitle?: string; light?: boolean }) {
   return (
-    <View style={{ gap: 4 }}>
+    <View style={{ gap: 6 }}>
       <Text style={[styles.title, props.light && { color: "#FFFFFF" }]}>{props.title}</Text>
       {props.subtitle ? (
         <Text style={[styles.subtitle, props.light && { color: "rgba(255,255,255,0.7)" }]}>{props.subtitle}</Text>
@@ -110,7 +111,7 @@ export function AppTextInput(props: ComponentProps<typeof TextInput>) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.cream,
+    backgroundColor: colors.background,
   },
   hero: {
     flex: 1,
@@ -139,24 +140,26 @@ const styles = StyleSheet.create({
     borderRadius: radii.lg,
     padding: 18,
     borderWidth: 1,
+    ...shadows.soft,
   },
   button: {
-    height: 54,
+    height: 56,
     borderRadius: radii.md,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 18,
+    paddingHorizontal: 20,
   },
   primaryButton: {
     backgroundColor: colors.plum,
+    ...shadows.glow,
   },
   secondaryButton: {
-    backgroundColor: "rgba(201,168,76,0.12)",
+    backgroundColor: "rgba(229,192,123,0.12)",
     borderWidth: 1,
-    borderColor: "rgba(201,168,76,0.35)",
+    borderColor: "rgba(229,192,123,0.35)",
   },
   ghostButton: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surfaceHighlight,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -165,54 +168,57 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#FFFFFF",
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "800",
+    letterSpacing: 0.5,
   },
   title: {
     color: colors.text,
-    fontSize: 28,
-    fontWeight: "700",
+    fontSize: 32,
+    fontWeight: "800",
     fontFamily: fonts.display,
   },
   subtitle: {
-    color: colors.muted,
-    fontSize: 14,
-    lineHeight: 21,
+    color: colors.textDim,
+    fontSize: 15,
+    lineHeight: 22,
   },
   statPill: {
-    backgroundColor: "rgba(255,255,255,0.14)",
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    backgroundColor: colors.glass,
+    borderRadius: radii.md,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     minWidth: 110,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
   },
   statValue: {
     color: "#FFFFFF",
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "800",
   },
   statLabel: {
     color: "rgba(255,255,255,0.72)",
     fontSize: 11,
-    marginTop: 4,
+    marginTop: 6,
     textTransform: "uppercase",
-    letterSpacing: 0.8,
+    letterSpacing: 1,
   },
   fieldLabel: {
-    color: colors.muted,
-    fontSize: 11,
+    color: colors.textDim,
+    fontSize: 12,
     fontWeight: "800",
     letterSpacing: 1.2,
     textTransform: "uppercase",
   },
   input: {
-    height: 52,
+    height: 56,
     borderRadius: radii.md,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surfaceHighlight,
     paddingHorizontal: 16,
     color: colors.text,
-    fontSize: 15,
+    fontSize: 16,
   },
 });
